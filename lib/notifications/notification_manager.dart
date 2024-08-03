@@ -40,7 +40,7 @@ class NotificationManager {
     await flutterLocalNotificationsPlugin.show(
       0,
       'Motion Detected',
-      'Unexpected movement has been detected.',
+      'There is unusaul Movement.',
       platformChannelSpecifics,
     );
   }

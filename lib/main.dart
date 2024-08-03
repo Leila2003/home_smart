@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:home_smart/ui/light_sensor_view.dart';
 import 'package:home_smart/ui/location_sensor_view.dart';
 import 'package:home_smart/ui/motion_sensor_view.dart';
+import 'package:home_smart/ui/welcome_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Smart Home Monitoring',
-      home: HomeScreen(),
+      home:WelcomePage(),
     );
   }
 }

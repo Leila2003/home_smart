@@ -58,42 +58,127 @@ class _LightSensorViewState extends State<LightSensorView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        AspectRatio(
-          aspectRatio: 1.7,
-          child: LineChart(
-            LineChartData(
-              lineBarsData: [
-                LineChartBarData(
-                  spots: _shouldUpdateChart ? _lightLevelData : [],
-                  isCurved: true,
-                  color: Color.fromARGB(255, 29, 222, 116),
-                  barWidth: 2,
-                  isStrokeCapRound: true,
-                  dotData: FlDotData(
-                    show: false,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Light Sensor View'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 1.7,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(show: true),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 20,
+                        reservedSize: 40,
+                        getTitlesWidget: (value, _) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 22,
+                        interval: 1,
+                        getTitlesWidget: (value, _) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                  belowBarData: BarAreaData(
-                    show: false,
+                  borderData: FlBorderData(
+                    show: true,
+                    border: const Border(
+                      bottom: BorderSide(color: Colors.black, width: 2),
+                      left: BorderSide(color: Colors.black, width: 2),
+                      right: BorderSide(color: Colors.transparent),
+                      top: BorderSide(color: Colors.transparent),
+                    ),
                   ),
+                  minX: 0,
+                  maxX: _lightLevelData.isEmpty
+                      ? 0
+                      : _lightLevelData.length.toDouble(),
+                  minY: 0,
+                  maxY: 100,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: _shouldUpdateChart ? _lightLevelData : [],
+                      isCurved: true,
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xff23b6e6),
+                          const Color(0xff02d39a),
+                        ],
+                        stops: const [0.1, 0.9],
+                      ),
+                      barWidth: 4,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: false,
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0x6623b6e6),
+                            const Color(0x6602d39a),
+                          ],
+                          stops: const [0.1, 0.9],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 20),
+            Slider(
+              value: _currentLightLevel,
+              min: 0,
+              max: 100,
+              divisions: 100,
+              label: _currentLightLevel.round().toString(),
+              onChanged: (newValue) {
+                setState(() {
+                  _currentLightLevel = newValue;
+                  _adjustScreenBrightness(newValue);
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Light Level: $_currentLightLevel lx',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-        Slider(
-          value: _currentLightLevel,
-          min: 0,
-          max: 100,
-          onChanged: (newValue) {
-            _adjustScreenBrightness(newValue);
-          },
-        ),
-        SizedBox(height: 20),
-        Text('Light Level: $_currentLightLevel lx'),
-      ],
+      ),
     );
   }
 }

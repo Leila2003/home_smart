@@ -4,6 +4,8 @@ import 'package:home_smart/notifications/notification_manager.dart';
 import 'package:home_smart/model/geofence.dart';
 import 'package:home_smart/sensors/location_sensor_manager.dart';
 import "package:home_smart/ui/geofence_selection_screen.dart";
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class LocationSensorView extends StatefulWidget {
   const LocationSensorView({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ class _LocationSensorViewState extends State<LocationSensorView> {
   bool _isInsideGeofence = false;
   String _permissionStatus = 'Checking permissions...';
   List<Geofence> _selectedGeofences = [];
+  bool _isSatelliteView = false; // State variable to toggle map view
 
   @override
   void initState() {
@@ -75,55 +78,117 @@ class _LocationSensorViewState extends State<LocationSensorView> {
     );
   }
 
+  void _toggleMapView() {
+    setState(() {
+      _isSatelliteView = !_isSatelliteView;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Position>(
-      stream: _locationSensorManager.locationStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error occurred'));
-        }
-
-        final position = snapshot.data;
-
-        bool isInsideGeofence =
-            _locationSensorManager.isInsideGeofence(position!);
-
-        if (isInsideGeofence != _isInsideGeofence) {
-          _isInsideGeofence = isInsideGeofence;
-          if (isInsideGeofence) {
-            _notificationManager.showGeofenceEntryNotification();
-          } else {
-            _notificationManager.showGeofenceExitNotification();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Location Sensor View'),
+        actions: [
+          IconButton(
+            icon: Icon(_isSatelliteView ? Icons.map : Icons.satellite),
+            onPressed: _toggleMapView,
+          ),
+        ],
+      ),
+      body: StreamBuilder<Position>(
+        stream: _locationSensorManager.locationStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
-        }
 
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error occurred'));
+          }
+
+          final position = snapshot.data;
+
+          bool isInsideGeofence =
+              _locationSensorManager.isInsideGeofence(position!);
+
+          if (isInsideGeofence != _isInsideGeofence) {
+            _isInsideGeofence = isInsideGeofence;
+            if (isInsideGeofence) {
+              _notificationManager.showGeofenceEntryNotification();
+            } else {
+              _notificationManager.showGeofenceExitNotification();
+            }
+          }
+
+          return Column(
             children: [
-              Text('Latitude: ${position.latitude}',
-                  style: const TextStyle(fontSize: 24)),
-              Text('Longitude: ${position.longitude}',
-                  style: const TextStyle(fontSize: 24)),
-              const SizedBox(height: 16),
-              Text(
-                'Geofence Status: ${isInsideGeofence ? 'Inside' : 'Outside'}',
-                style: const TextStyle(fontSize: 18),
+              Expanded(
+                child: FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(position.latitude, position.longitude),
+                    zoom: 15.0,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: _isSatelliteView
+                          ? 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+                          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: LatLng(position.latitude, position.longitude),
+                          width: 80.0,
+                          height: 80.0,
+                          builder: (ctx) => Icon(
+                            Icons.location_on,
+                            color: Colors.red,
+                            size: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                    CircleLayer(
+                      circles: _selectedGeofences.map((geofence) {
+                        return CircleMarker(
+                          point: LatLng(geofence.latitude, geofence.longitude),
+                          color: Colors.blue.withOpacity(0.3),
+                          borderStrokeWidth: 2.0,
+                          borderColor: Colors.blue,
+                          radius: geofence.radius,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
-              ElevatedButton(
-                onPressed: _showGeofenceSelectionScreen,
-                child: const Text('Select Geofences'),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Latitude: ${position.latitude}',
+                        style: const TextStyle(fontSize: 24)),
+                    Text('Longitude: ${position.longitude}',
+                        style: const TextStyle(fontSize: 24)),
+                    const SizedBox(height: 16),
+                    // Text(
+                    //   'Geofence Status: ${isInsideGeofence ? 'Inside' : 'Outside'}',
+                    //   style: const TextStyle(fontSize: 18),
+                    // ),
+                    // ElevatedButton(
+                    //   onPressed: _showGeofenceSelectionScreen,
+                    //   child: const Text('Select Geofences'),
+                    // ),
+                  ],
+                ),
               ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
