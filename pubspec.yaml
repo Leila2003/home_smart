@@ -30,17 +30,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sensors_plus: ^5.0.1
+  sensors_plus: ^6.0.0
   light: ^3.0.1
   geolocator: ^12.0.0
-  fl_chart: ^0.61.0
+  fl_chart: ^0.68.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons clamote: Enumerating objects: 278, done.
 
   cupertino_icons: ^1.0.6
   screen_brightness: ^1.0.1
-  flutter_local_notifications: ^13.0.0
+  flutter_local_notifications: ^17.2.1+2
   flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:

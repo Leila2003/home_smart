@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Smart Home Monitoring'),
+        title: const Text('WELCOME'),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Color.fromARGB(255, 105, 187, 234),
         onTap: _onItemTapped,
       ),
     );

@@ -69,7 +69,7 @@ class _LightSensorViewState extends State<LightSensorView> {
                 LineChartBarData(
                   spots: _shouldUpdateChart ? _lightLevelData : [],
                   isCurved: true,
-                  color: Colors.blue,
+                  color: Color.fromARGB(255, 29, 222, 116),
                   barWidth: 2,
                   isStrokeCapRound: true,
                   dotData: FlDotData(

@@ -60,7 +60,7 @@ class _MotionSensorViewState extends State<MotionSensorView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: isMotionDetected ? Colors.red.shade100 : Colors.green.shade100,
+      color: isMotionDetected ? Color.fromARGB(255, 166, 208, 14) : Color.fromARGB(255, 203, 22, 130),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
